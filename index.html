@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>萌車日記 MoeCar Journal</title>
+    <link rel="manifest" href="./manifest.json">
+    <style>
+        /* 🎨 日系療癒草莓燕麥奶配色與圓潤貼紙風格 */
+        :root {
+            --bg-color: #FDF6F0;
+            --primary: #FFB3B3;
+            --primary-light: #FFE5E5;
+            --text: #654E46;
+            --card-bg: #FFFFFF;
+            --mint: #A0D8B3;
+            --lavender: #E8D3FF;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            font-family: 'PingFang TC', 'SF Pro Text', 'Microsoft JhengHei', sans-serif; 
+            color: var(--text); 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        body { 
+            background-color: #EAE3DC; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+        }
+        
+        .phone { 
+            width: 100%; 
+            max-width: 390px; 
+            height: 100vh; 
+            max-height: 844px; 
+            background-color: var(--bg-color); 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            overflow: hidden; 
+        }
+
+        @media (min-width: 400px) { 
+            .phone { 
+                border: 12px solid #333; 
+                border-radius: 40px; 
+                height: 800px; 
+            } 
+        }
+
+        .header { 
+            background-color: var(--primary-light); 
+            padding: 15px 20px; 
+            border-bottom-left-radius: 24px; 
+            border-bottom-right-radius: 24px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+
+        .header h1 { font-size: 18px; }
+
+        .cute-select { 
+            background: var(--card-bg); 
+            border: 2px solid var(--primary); 
+            border-radius: 12px; 
+            padding: 4px 10px; 
+            font-size: 14px; 
+            font-weight: bold; 
+            outline: none; 
+            cursor: pointer;
+        }
+
+        .content { 
+            flex: 1; 
+            padding: 20px; 
+            overflow-y: auto; 
+            padding-bottom: 30px; 
+        }
+        
+        .page { display: none; }
+        .page.active { display: block; }
+
+        .cute-card { 
+            background: var(--card-bg); 
+            border-radius: 24px; 
+            padding: 18px; 
+            margin-bottom: 15px; 
+            border: 2px solid #FFF; 
+            box-shadow: 0 8px 16px rgba(101,78,70,0.03); 
+        }
+
+        .car-info { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+        }
+
+        .avatar { 
+            font-size: 32px; 
+            background: var(--primary-light); 
+            width: 55px; 
+            height: 55px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        
+        .form-group { 
+            margin-bottom: 12px; 
+            text-align: left; 
+        }
+
+        .form-group label { 
+            display: block; 
+            font-size: 13px; 
+            font-weight: bold; 
+            margin-bottom: 4px; 
+            padding-left: 4px; 
+        }
+
+        .cute-input { 
+            width: 100%; 
+            padding: 10px 14px; 
+            border: 2px solid #EAE3DC; 
+            border-radius: 16px; 
+            background-color: #FAF8F5; 
+            font-size: 14px; 
+            outline: none; 
+            transition: border-color 0.2s;
+        }
+
+        .cute-input:focus { border-color: var(--primary); }
+
+        .cute-btn { 
+            width: 100%; 
+            background-color: var(--primary); 
+            border: none; 
+            padding: 12px; 
+            border-radius: 18px; 
+            font-size: 16px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            box-shadow: 0 4px 0px #E69B9B; 
+            margin-top: 10px; 
+            transition: transform 0.1s;
+        }
+
+        .cute-btn:active { 
+            transform: translateY(4px); 
+            box-shadow: none; 
+        }
+
+        .nav { 
+            height: 70px; 
+            background: var(--card-bg); 
+            border-top: 2px solid var(--primary-light); 
+            display: flex; 
+            justify-content: space-around; 
+            align-items: center; 
+            padding-bottom: 10px; 
+        }
+
+        .nav-item { 
+            font-size: 12px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            text-align: center; 
+            opacity: 0.4; 
+            transition: opacity 0.2s;
+        }
+
+        .nav-item.active { 
+            opacity: 1; 
+            color: var(--primary); 
+        }
+    </style>
+</head>
+<body>
+
+<div class="phone">
+    <div class="header">
+        <h1>🐾 萌車日記</h1>
+        <select class="cute-select" id="vehicleSelect"></select>
+    </div>
+
+    <div class="content">
+        
+        <!-- 【分頁 1：首頁 / 點心補給】 -->
+        <div id="page-fuel" class="page active">
+            <div class="cute-card car-info">
+                <div class="avatar">🚗</div>
+                <div style="text-align: right;">
+                    <h3 id="home-car-name" style="font-size: 18px;">載入中...</h3>
+                    <p id="home-car-odo" style="font-size: 14px; color: #9E8E88; margin-top: 4px;">總里程 0 km</p>
+                </div>
+            </div>
+
+            <div class="cute-card" style="background: #FFFBF2;">
+                <p style="font-size: 14px; color: #8C766C;">距離下次做美容 SPA 還剩</p>
+                <h2 id="home-spa-countdown" style="font-size: 28px; color: #E5895E; margin: 6px 0;">計算中...</h2>
+                <p style="font-size: 11px; color: #B5A49E;">建議每 10,000 km 就要疼愛車車一次唷！</p>
+            </div>
+
+            <!-- 日常補給表單 (動態變身) -->
+            <div class="cute-card" id="fuel-form-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <p id="fuel-form-title" style="font-weight: bold; font-size: 16px; margin: 0;">✏️ 記下一筆日常補給</p>
+                    <button class="cute-btn" id="btn-cancel-fuel-edit" style="width: auto; padding: 4px 10px; font-size: 12px; margin: 0; background-color: #EAE3DC; box-shadow: 0 3px 0px #B5A49E; display: none;">返回新增 ➕</button>
+                </div>
+                <div class="form-group">
+                    <label>日期 📅</label>
+                    <input type="date" class="cute-input" id="f-date">
+                </div>
+                
+                <!-- ⛽ 油車與 PHEV 可填欄位 -->
+                <div id="f-wrapper-gas">
+                    <div class="form-group">
+                        <label>今天加什麼油？ ⛽</label>
+                        <select class="cute-input" id="f-gas-type">
+                            <option value="95">95 頂級澎湃餐 ⛽</option>
+                            <option value="98">98 豪華全餐 ⛽</option>
+                            <option value="92">92 經濟輕食 ⛽</option>
+                            <option value="Diesel">超級柴油餐 ⛽</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>喝了多少油 (公升 L)</label>
+                        <input type="number" step="0.01" class="cute-input" id="f-gas-amount" placeholder="不加油請填 0 或留空">
+                    </div>
+                    <div class="form-group">
+                        <label>加油花費金額 ($)</label>
+                        <input type="number" class="cute-input" id="f-gas-cost" placeholder="沒有花費請填 0">
+                    </div>
+                </div>
+
+                <!-- ⚡ 電車與 PHEV 可填欄位 -->
+                <div id="f-wrapper-elec">
+                    <div class="form-group">
+                        <label>充了多少電 (電力度數 kWh)</label>
+                        <input type="number" step="0.01" class="cute-input" id="f-elec-amount" placeholder="不充電請填 0 或留空">
+                    </div>
+                    <div class="form-group">
+                        <label>充電花費金額 ($)</label>
+                        <input type="number" class="cute-input" id="f-elec-cost" placeholder="免費充電請填 0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>目前的總里程數 (km) <span id="f-last-odo-tip" style="font-size: 11px; color: #A476D3; font-weight: normal; margin-left: 5px;">(前次里程: 載入中...)</span></label>
+                    <input type="number" class="cute-input" id="f-odo" placeholder="這次補給時的儀表板里程">
+                </div>
+                
+                <div class="form-group" style="display: flex; gap: 15px; margin: 5px 0 10px 0;">
+                    <label style="display: flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer;">
+                        <input type="checkbox" id="f-isFull" checked> 餵得超級飽（加滿）🐷
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 4px; font-size: 12px; cursor: pointer;">
+                        <input type="checkbox" id="f-isMissed"> 糟糕！上次漏記了 🙈
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label>悄悄話備忘錄 📝</label>
+                    <input type="text" class="cute-input" id="f-note" placeholder="有什麼想碎碎念的嗎？">
+                </div>
+
+                <!-- 🌟 補給按鈕控制區 -->
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="cute-btn" id="btn-delete-fuel" style="margin: 0; flex: 1; background-color: #FFB3B3; border: 2px solid #FFF; box-shadow: 0 4px 0px #D37575; color: #FFF; font-size: 14px; display: none;">🗑️ 刪除此筆</button>
+                    <button class="cute-btn" id="btn-save-fuel" style="margin: 0; flex: 1;">餵飽並保存 🛠️</button>
+                </div>
+            </div>
+
+            <div class="cute-card" style="text-align: left;">
+                <p style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">📋 最近的小補給紀錄</p>
+                <div id="home-recent-logs" style="font-size: 13px; color: #9E8E88; line-height: 1.6;"></div>
+            </div>
+        </div>
+
+        <!-- 【分頁 2：維修保養 / 沙龍護理】 -->
+        <div id="page-service" class="page">
+            <div class="cute-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <p id="service-form-title" style="font-weight: bold; font-size: 16px; margin: 0;">✨ 紀錄本次保養沙龍</p>
+                    <button class="cute-btn" id="btn-cancel-service-edit" style="width: auto; padding: 4px 10px; font-size: 12px; margin: 0; background-color: #EAE3DC; box-shadow: 0 3px 0px #B5A49E; display: none;">返回新增 ➕</button>
+                </div>
+                <div class="form-group"><label>保養日期 📅</label><input type="date" class="cute-input" id="s-date"></div>
+                <div class="form-group">
+                    <label>保養時的里程 (km) <span id="s-last-odo-tip" style="font-size: 11px; color: #A476D3; font-weight: normal; margin-left: 5px;">(前次里程: 載入中...)</span></label>
+                    <input type="number" class="cute-input" id="s-odo">
+                </div>
+                <div class="form-group"><label>美容護理項目 🧴</label><input type="text" class="cute-input" id="s-items" placeholder="換機油、馬達檢查..."></div>
+                <div class="form-group"><label>沙龍花費金額 ($)</label><input type="number" class="cute-input" id="s-cost"></div>
+                <div class="form-group"><label>悄悄話備忘錄 📝</label><input type="text" class="cute-input" id="s-note"></div>
+
+                <!-- 🌟 沙龍按鈕控制區 -->
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="cute-btn" id="btn-delete-service" style="margin: 0; flex: 1; background-color: #FFB3B3; border: 2px solid #FFF; box-shadow: 0 4px 0px #D37575; color: #FFF; font-size: 14px; display: none;">🗑️ 刪除保養</button>
+                    <button class="cute-btn" id="btn-save-service" style="margin: 0; flex: 1; background-color: var(--lavender); box-shadow: 0 4px 0px #C7B0DE;">紀錄完畢 🌸</button>
+                </div>
+            </div>
+            <div class="cute-card" style="text-align: left;">
+                <p style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">🎀 歷史沙龍紀錄</p>
+                <div id="service-history-logs" style="font-size: 13px; color: #9E8E88; line-height: 1.6;"></div>
+            </div>
+        </div>
+
+        <!-- 【分頁 3：數據分析 / 聯絡簿】 -->
+        <div id="page-stats" class="page">
+            <div style="font-weight: bold; margin: 0 0 10px 5px; font-size: 15px; text-align: left;">🚗 愛車大局觀 (Overall)</div>
+            <div class="cute-card" style="padding: 14px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #F5EBE6; font-size: 14px;"><span>💰 總運行花費</span><span id="st-total-running" style="font-weight: bold;">$0</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #F5EBE6; font-size: 14px;"><span>📅 每天養車開銷</span><span id="st-cost-day" style="font-weight: bold;">$0</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #F5EBE6; font-size: 14px;"><span>🛣️ 每公里滑行成本</span><span id="st-cost-km" style="font-weight: bold;">$0</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px;"><span>🏡 總相處里程</span><span id="st-total-dist" style="font-weight: bold;">0 km</span></div>
+            </div>
+
+            <div style="font-weight: bold; margin: 0 0 10px 5px; font-size: 15px; text-align: left;">⛽ 胃口好不好 (Fuel-Ups)</div>
+            <div class="cute-card" style="padding: 14px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #F5EBE6; font-size: 14px;"><span>⛽ 平均油耗</span><span id="st-avg-fuel" style="font-weight: bold; color: #6FA884;">0 km/L</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #F5EBE6; font-size: 14px;"><span>⚡ 平均電耗</span><span id="st-avg-elec" style="font-weight: bold; color: #6FA884;">0 km/kWh</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #F5EBE6; font-size: 14px;"><span>💵 總共花掉的能源費</span><span id="st-total-fuel-cost" style="font-weight: bold;">$0</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #F5EBE6; font-size: 14px;"><span>🥛 總共喝了多少油</span><span id="st-total-fuel-liters" style="font-weight: bold;">0 L</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px;"><span>⚡ 總共吃了多少電</span><span id="st-total-fuel-kwh" style="font-weight: bold;">0 kWh</span></div>
+            </div>
+
+            <div style="font-weight: bold; margin: 0 0 10px 5px; font-size: 15px; text-align: left;">🛠️ 美容美髮開銷 (Services)</div>
+            <div class="cute-card" style="padding: 14px;">
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed #F5EBE6; font-size: 14px;"><span>🎀 總美容花費</span><span id="st-total-service" style="font-weight: bold; color: #A476D3;">$0</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; font-size: 14px;"><span>💈 做 SPA 的次數</span><span id="st-service-count" style="font-weight: bold;">0 次</span></div>
+            </div>
+        </div>
+
+        <!-- 【分頁 4：車輛設定 / 小窩】 -->
+        <div id="page-settings" class="page">
+            <div class="cute-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <p id="settings-title" style="font-weight: bold; font-size: 16px; margin: 0;">🏡 維護車車資料</p>
+                    <button class="cute-btn" id="btn-new-vehicle" style="width: auto; padding: 6px 12px; font-size: 12px; margin: 0; background-color: var(--mint); box-shadow: 0 3px 0px #7CB38F;">➕ 領養新車</button>
+                </div>
+                <div class="form-group"><label>車車暱稱 🎀</label><input type="text" class="cute-input" id="v-name" placeholder="例如: 小紅豆"></div>
+                <div class="form-group"><label>車子品牌與型號 🚘</label><input type="text" class="cute-input" id="v-model" placeholder="例如: Volvo XC60"></div>
+                <div class="form-group">
+                    <label>動力心臟種類 ✨</label>
+                    <select class="cute-input" id="v-type">
+                        <option value="Gasoline">汽油車 / 柴油車 ⛽</option>
+                        <option value="EV">純電動車 EV ⚡</option>
+                        <option value="PHEV">插電式油電 PHEV 🔋+⛽</option>
+                    </select>
+                </div>
+                
+                <!-- ⛽ 油箱容量欄位 -->
+                <div class="form-group" id="v-wrapper-tank"><label>油箱肚子容量 (公升 L)</label><input type="number" class="cute-input" id="v-tank" placeholder="例如: 55"></div>
+                
+                <!-- ⚡ 電池容量欄位 -->
+                <div class="form-group" id="v-wrapper-battery" style="display: none;"><label>大電池肚子容量 (度數 kWh)</label><input type="number" class="cute-input" id="v-battery" placeholder="例如: 18.8"></div>
+                
+                <div class="form-group"><label>初次相遇的里程 (km)</label><input type="number" class="cute-input" id="v-odo" placeholder="如果是新車就填 0 唷"></div>
+                <div class="form-group"><label>迎娶車身價 / 車價 ($)</label><input type="number" class="cute-input" id="v-price" placeholder="例如: 2600000"></div>
+                
+                <!-- 雙按鈕並排區 (黃金比例修正版) -->
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button class="cute-btn" id="btn-delete-vehicle" style="margin: 0; flex: 1; background-color: #FFB3B3; border: 2px solid #FFF; box-shadow: 0 4px 0px #D37575; color: #FFF; font-size: 14px; display: none;">❌ 釋放車車</button>
+                    <button class="cute-btn" id="btn-save-vehicle" style="margin: 0; flex: 1; font-size: 14px;">確認修改儲存 💾</button>
+                </div>
+
+                <!-- 💾 資料備份與還原 -->
+                <div style="margin-top: 25px; border-top: 2px dashed var(--primary-light); padding-top: 20px; text-align: left;">
+                    <p style="font-weight: bold; font-size: 14px; margin-bottom: 10px; color: #8C766C;">🧬 日記時光機（資料備份）</p>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="cute-btn" id="btn-export-json" style="flex: 1; margin: 0; background-color: var(--mint); box-shadow: 0 4px 0px #7CB38F; font-size: 13px;">匯出日記備份 💾</button>
+                        <button class="cute-btn" id="btn-import-json" style="flex: 1; margin: 0; background-color: var(--lavender); box-shadow: 0 4px 0px #C7B0DE; font-size: 13px;">導入歷史日記 📂</button>
+                    </div>
+                    <input type="file" id="file-import-input" accept=".json" style="display: none;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="nav">
+        <div class="nav-item active" data-page="fuel">⛽ 點心</div>
+        <div class="nav-item" data-page="service">🛠️ 沙龍</div>
+        <div class="nav-item" data-page="stats">📊 聯絡簿</div>
+        <div class="nav-item" data-page="settings">🏡 小窩</div>
+    </div>
+</div>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
